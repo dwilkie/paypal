@@ -27,13 +27,13 @@ Note: Your class must respond to `params` and return a hash of paypal ipn parame
 ##### Public methods
 * `payment_completed?`
 * `payment_status`
+* `txn_id`
 
 ##### Private methods
 * `verify` Verifies the IPN with paypal and returns true or false
 * `receiver_email`
 * `self.txn_type(params)`
 * `self.masspay_transaction?(params)`
-* `self.txn_id(params)`
 
 #### Paypal::Ipn::Buyer
     class BuyerPaypalIpn
@@ -76,10 +76,10 @@ Note: Currently Masspay IPN's only support a single transaction
 
 ##### Public methods
 * `payment_status` Returns the payment status for the 1st transaction
+* `txn_id` Returns the transaction id for the 1st transaction
 
 ##### Private methods
 * `unique_id` Returns the unique_id for the 1st transaction
-* `self.masspay_txn_id(params)` Returns the transaction id for the 1st transaction
 
 ### Masspay
     class Masspay
