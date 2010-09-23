@@ -3,7 +3,7 @@ module Paypal
     include HTTParty
 
     def self.masspay(payer_email, receiver_email, amount, currency, note, unique_id)
-      request_uri = Paypal.nvp_uri
+      request_uri = URI.parse(Paypal.nvp_uri)
       request_uri.scheme = "https" # force https
 
       body = {
@@ -15,12 +15,16 @@ module Paypal
         "PWD" => Paypal.api_password,
         "SIGNATURE" => Paypal.api_signature,
         "RECEIVERTYPE" => "EmailAddress",
-        "L_EMAIL0" => receiver.email,
+        "L_EMAIL0" => receiver_email,
         "L_AMT0" => amount,
         "L_UNIQUEID0" => unique_id,
         "L_NOTE0" => note
       }
       self.post(request_uri.to_s, :body => body).body
+    end
+
+    def successful_payment?
+      payment_response["ACK"] == "Success"
     end
 
     private
@@ -33,6 +37,15 @@ module Paypal
           note,
           unique_id
         )
+      end
+
+      def payment_error_type
+        case payment_response["L_ERRORCODE0"]
+          when "10002" || "10007"
+            :unauthorized
+          when "10321"
+            :insufficient_funds
+        end
       end
   end
 end

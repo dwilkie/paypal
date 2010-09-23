@@ -24,17 +24,22 @@ module Paypal
       ).body == "VERIFIED"
     end
 
+    def payment_status
+      params["payment_status"] if params
+    end
+
     def payment_completed?
       payment_status == "Completed"
     end
 
+    def txn_id
+      params["txn_id"]
+    end
+    alias_method :transaction_id, :txn_id
+
     private
       def verify
         Paypal::Ipn.verify(params)
-      end
-
-      def payment_status
-        params["payment_status"] if params
       end
 
       def receiver_email
@@ -49,10 +54,6 @@ module Paypal
 
         def masspay_transaction?(params)
           txn_type(params) == "masspay"
-        end
-
-        def txn_id(params)
-          params["txn_id"]
         end
     end
   end
