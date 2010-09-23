@@ -2,11 +2,11 @@ module Paypal
   module Ipn
     module Masspay
       def payment_status
-        params["status_1"]
+        params["status_1"] if params
       end
 
       def txn_id
-        params["masspay_txn_id_1"]
+        params["masspay_txn_id_1"] if params
       end
       alias_method :transaction_id, :txn_id
 

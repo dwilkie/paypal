@@ -33,7 +33,7 @@ module Paypal
     end
 
     def txn_id
-      params["txn_id"]
+      params["txn_id"] if params
     end
     alias_method :transaction_id, :txn_id
 
