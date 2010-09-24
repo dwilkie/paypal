@@ -77,6 +77,7 @@ Note: Currently Masspay IPN's only support a single transaction
 ##### Public methods
 * `payment_status` Returns the payment status for the 1st transaction
 * `txn_id` Returns the transaction id for the 1st transaction
+* `payment_unclaimed?` Returns whether the payment status for the 1st transaction was unclaimed or not
 
 ##### Private methods
 * `unique_id` Returns the unique_id for the 1st transaction

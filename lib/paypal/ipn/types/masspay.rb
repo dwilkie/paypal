@@ -5,6 +5,10 @@ module Paypal
         params["status_1"] if params
       end
 
+      def payment_unclaimed?
+        payment_status == "Unclaimed"
+      end
+
       def txn_id
         params["masspay_txn_id_1"] if params
       end
