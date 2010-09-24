@@ -107,7 +107,7 @@ Generates a stub initializer under config/initializers
 
 ## Installation
 
-    gem install paypal
+    gem install paypal-ipn
 
 Copyright (c) 2010 David Wilkie, released under the MIT license
 
