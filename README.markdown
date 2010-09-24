@@ -95,7 +95,9 @@ Note: Your class must respond to `payment_response` and return the payment respo
 ##### Private methods
 * `masspay(payer_email, receiver_email, amount, currency, note, unique_id)` Sends a mass pay request from *payer_email* to *receiver_email* for *amount* in *currency*. The *note* will appear on the receivers paypal account and the *unique_id* will be passed back in the Paypal IPN. Returns the response from paypal.
 
-* `payment_error_type` Returns *:unauthorized* or *:insufficient_funds* for these types of errors otherwise returns nil
+* `payment_error_type` Returns *:unauthorized* or *:insufficient_funds* for these types of errors otherwise returns *:unknown*
+
+* `payment_error_message` Returns the paypal long error message
 
 Note: Currently Masspay payments only support a single recipient
 

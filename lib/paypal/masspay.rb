@@ -45,7 +45,13 @@ module Paypal
             :unauthorized
           when "10321"
             :insufficient_funds
+          else
+            :unknown
         end
+      end
+
+      def payment_error_message
+        payment_response["L_LONGMESSAGE0"]
       end
   end
 end
