@@ -108,7 +108,7 @@ Note: Currently Masspay payments only support a single recipient
 ## Rails
 
 Place the following in your Gemfile:
-    `gem paypal-ipn, :require => "paypal"`
+    `gem 'paypal-ipn', :require => 'paypal'`
 
 To generate a stub initializer under config/initializers run:
     `rails g paypal:initializer`
