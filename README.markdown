@@ -101,13 +101,18 @@ Note: Your class must respond to `payment_response` and return the payment respo
 
 Note: Currently Masspay payments only support a single recipient
 
-## Rails
-    `rails g paypal:initializer`
-Generates a stub initializer under config/initializers
-
 ## Installation
 
     gem install paypal-ipn
+
+## Rails
+
+Place the following in your Gemfile:
+    `gem paypal-ipn, :require => "paypal"`
+
+To generate a stub initializer under config/initializers run:
+    `rails g paypal:initializer`
+
 
 Copyright (c) 2010 David Wilkie, released under the MIT license
 
