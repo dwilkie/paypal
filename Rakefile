@@ -17,7 +17,7 @@ end
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gemspec|
-    gemspec.name = "paypal"
+    gemspec.name = "paypal-ipn"
     gemspec.summary = "Another ruby wrapper for Paypal"
     gemspec.email = "dwilkie@gmail.com"
     gemspec.homepage = "http://github.com/dwilkie/paypal"
