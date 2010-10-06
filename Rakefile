@@ -23,6 +23,7 @@ begin
     gemspec.homepage = "http://github.com/dwilkie/paypal"
     gemspec.authors = ["David Wilkie"]
     gemspec.add_runtime_dependency "httparty", ">=0.6.1"
+    gemspec.add_runtime_dependency "rack"
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: gem install jeweler"

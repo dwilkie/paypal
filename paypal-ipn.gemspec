@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["David Wilkie"]
-  s.date = %q{2010-09-24}
+  s.date = %q{2010-10-06}
   s.email = %q{dwilkie@gmail.com}
   s.extra_rdoc_files = [
     "README.markdown"
@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
      "lib/paypal/ipn/variables/buyer.rb",
      "lib/paypal/ipn/variables/item.rb",
      "lib/paypal/masspay.rb",
-     "paypal.gemspec"
+     "paypal-ipn.gemspec"
   ]
   s.homepage = %q{http://github.com/dwilkie/paypal}
   s.rdoc_options = ["--charset=UTF-8"]
