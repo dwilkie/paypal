@@ -12,8 +12,8 @@ module Paypal
   LIVE_NVP_URI = "https://api-3t.paypal.com/nvp"
   SANDBOX_NVP_URI = "https://api-3t.sandbox.paypal.com/nvp"
 
-  LIVE_WEBSCR_URI = "https://www.paypal.com/cgi-bin/webscr"
-  SANDBOX_WEBSCR_URI = "https://www.sandbox.paypal.com/cgi-bin/webscr"
+  LIVE_URI = "https://www.paypal.com"
+  SANDBOX_URI = "https://www.sandbox.paypal.com"
 
   mattr_accessor :environment,
                  :api_username,
@@ -32,10 +32,10 @@ module Paypal
       SANDBOX_NVP_URI
   end
 
-  def self.webscr_uri
+  def self.uri
     environment == "live" ?
-      LIVE_WEBSCR_URI :
-      SANDBOX_WEBSCR_URI
+      LIVE_URI :
+      SANDBOX_URI
   end
 end
 

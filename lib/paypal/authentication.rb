@@ -26,7 +26,7 @@ module Paypal
 
       def self.build_uri_from_set_access_permissions_response(response)
         token = Rack::Utils.parse_nested_query(response)["TOKEN"]
-        uri = URI.parse(Paypal.webscr_uri)
+        uri = URI.parse(Paypal.uri)
         query_hash = {
           "cmd" => "_account-authenticate-login",
           "token" => token

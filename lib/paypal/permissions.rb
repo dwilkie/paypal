@@ -26,7 +26,8 @@ module Paypal
         request_uri = URI.parse(Paypal.nvp_uri)
         request_uri.scheme = "https" # force https
         response = Paypal::Permissions.set_access_permissions(request_uri.to_s, body)
-        Paypal::Permissions.build_uri_from_set_access_permissions_response(response)
+        url = Paypal::Permissions.build_uri_from_set_access_permissions_response(response)
+        url ? url : return_url
       end
 
       def self.set_access_permissions(request_uri, body)
@@ -60,10 +61,13 @@ module Paypal
       end
 
       def self.build_uri_from_set_access_permissions_response(response)
-        token = Rack::Utils.parse_nested_query(response)["TOKEN"]
-        uri = URI.parse(Paypal.webscr_uri)
-        uri.query = Rack::Utils.build_nested_query("token" => token)
-        uri.to_s
+        if token = Rack::Utils.parse_nested_query(response)["TOKEN"]
+          uri = URI.parse(Paypal.uri)
+          uri.query = Rack::Utils.build_nested_query(
+            "token" => token, "_cmd" => "_access-permission-login"
+          )
+          uri.to_s
+        end
       end
 
       def self.camelize(lower_case_and_underscored_word)
