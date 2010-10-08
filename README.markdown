@@ -6,6 +6,8 @@ Currently paypal supports the following:
 
 * Verifying Paypal IPN's
 * MassPay Requests
+* Permissions Service
+* Authentication Service
 
 ## Configuration
     Paypal.setup do |config|
@@ -100,6 +102,44 @@ Note: Your class must respond to `payment_response` and return the payment respo
 * `payment_error_message` Returns the paypal long error message
 
 Note: Currently Masspay payments only support a single recipient
+
+### Permissions Service
+    class Permissions
+      include Paypal::Permissions
+    end
+
+#### Usage
+1. Make a call to `set_paypal_permissions_url` setting the *return_url* to your application's callback url and with your *required_permissions*
+
+2. Redirect the user to that url
+
+3. When Paypal redirects the user back to your application at *return_url* make a call to `get_paypal_permissions` with the token parameter
+
+See below for further details:
+
+##### Private methods
+`set_paypal_permissions_url(return_url, required_permissions = {})`
+Returns a url where the user can sign in to Paypal and authorize the requested permissions. Paypal will then redirect the user to the *return_url*. Specify *required_permissions* by supplying a hash in the following format:
+    {
+      :mass_pay => true,
+      :refund_transaction => true,
+      :get_transaction_details => true
+    }
+First name, Last name and email are always required permissions so you never have to specify these manually.
+
+`get_paypal_permissions(token)`
+Returns a hash of user information and permission details for the given *token* in the following format:
+    {
+      :email => "joe@example.com",
+      :first_name => "Joe",
+      :last_name => "Bloggs",
+      :payer_id => "VK7XZU4BDY79",
+      :permissions => {
+        :mass_pay => true,
+        :refund_transaction => true,
+        :get_transaction_details => true
+      }
+    }
 
 ## Installation
 
