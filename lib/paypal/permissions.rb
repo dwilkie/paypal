@@ -9,7 +9,7 @@ module Paypal
         index = 0
         required_permissions.each do |k,v|
           if v
-            paypal_required_permissions["L_REQUIREDACCESSPERMISSIONS#{index}"] = Paypal::Permissions.permission_name(k)
+            paypal_required_permissions["L_REQUIREDACCESSPERMISSIONS#{index}"] = Paypal::Permissions.paypal_permission_name(k)
             index += 1
           end
         end
@@ -23,18 +23,30 @@ module Paypal
           "CANCELURL" => return_url,
           "LOGOUTURL"=> return_url
         }.merge(paypal_required_permissions)
-        request_uri = URI.parse(Paypal.nvp_uri)
-        request_uri.scheme = "https" # force https
-        response = Paypal::Permissions.set_access_permissions(request_uri.to_s, body)
+        response = Paypal::Permissions.send_request(body)
         url = Paypal::Permissions.build_uri_from_set_access_permissions_response(response)
         url ? url : return_url
       end
 
-      def self.set_access_permissions(request_uri, body)
-        self.post(request_uri, :body => body).body
+      def get_paypal_permissions(token)
+        body = {
+          "METHOD" => "GetAccessPermissionDetails",
+          "VERSION" => "2.3",
+          "USER" => Paypal.api_username,
+          "PWD" => Paypal.api_password,
+          "SIGNATURE" => Paypal.api_signature,
+          "TOKEN" => token
+        }
+        Paypal::Permissions.normalize_paypal_response(
+          Paypal::Permissions.send_request(body)
+        )
       end
 
-      def self.permission_name(key)
+      def self.send_request(body)
+        self.post(Paypal.nvp_uri, :body => body).body
+      end
+
+      def self.paypal_permission_name(key)
         case key.to_s
 
         when "express_checkout"
@@ -70,8 +82,44 @@ module Paypal
         end
       end
 
+      def self.normalize_paypal_response(raw_response)
+        raw_response_hash = Rack::Utils.parse_nested_query(raw_response)
+        if raw_response_hash["ACK"] == "Success"
+          normalized_response = {
+            :payer_id => raw_response_hash["PAYERID"],
+            :first_name => raw_response_hash["FIRSTNAME"],
+            :last_name => raw_response_hash["LASTNAME"],
+            :email => raw_response_hash["EMAIL"],
+            :permissions => normalize_permissions(raw_response_hash)
+          }
+        end
+      end
+
+      def self.normalize_permissions(raw_response_hash)
+        normalized_permissions = {}
+        permission_name_key = "L_ACCESSPERMISSIONNAME"
+        permission_status_key = "L_ACCESSPERMISSIONSTATUS"
+        i = 0
+        begin
+          permission = raw_response_hash[permission_name_key + i.to_s]
+          permission_status = raw_response_hash[permission_status_key + i.to_s]
+          normalized_permissions[underscore(permission).to_sym] = (permission_status == "Accepted") if permission && permission_status
+          i += 1
+        end until permission.nil? || permission_status.nil?
+        normalized_permissions
+      end
+
       def self.camelize(lower_case_and_underscored_word)
         lower_case_and_underscored_word.to_s.gsub(/(?:^|_)(.)/) { $1.upcase }
+      end
+
+      def self.underscore(camel_cased_word)
+        word = camel_cased_word.to_s.dup
+        word.gsub!(/([A-Z]+)([A-Z][a-z])/,'\1_\2')
+        word.gsub!(/([a-z\d])([A-Z])/,'\1_\2')
+        word.tr!("-", "_")
+        word.downcase!
+        word
       end
     end
 end

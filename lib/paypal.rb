@@ -26,7 +26,7 @@ module Paypal
     yield self
   end
 
-  def self.nvp_uri
+  def self.nvp_uri(force_https = true)
     environment == "live" ?
       LIVE_NVP_URI :
       SANDBOX_NVP_URI
