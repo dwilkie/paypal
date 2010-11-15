@@ -76,7 +76,7 @@ module Paypal
         if token = Rack::Utils.parse_nested_query(response)["TOKEN"]
           uri = URI.parse(Paypal.uri)
           uri.query = Rack::Utils.build_nested_query(
-            "token" => token, "_cmd" => "_access-permission-login"
+            "token" => token, "cmd" => "_access-permission-login"
           )
           uri.to_s
         end
