@@ -1,7 +1,7 @@
 module Paypal
   module Ipn
     module Buyer
-      def customer_address(delimeter = ",\n")
+      def customer_address(delimeter = "\n")
         [
           customer_address_name,
           customer_address_street,
