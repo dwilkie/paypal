@@ -26,8 +26,8 @@ module Paypal
         def item_attribute_value(key, index = nil, delimeter = "")
           non_indexed_value = params[key]
           index && params["num_cart_items"] ?
-            params["#{key}#{delimeter}#{index + 1}"]
-          : non_indexed_value
+            params["#{key}#{delimeter}#{index + 1}"] :
+            non_indexed_value
         end
     end
   end
