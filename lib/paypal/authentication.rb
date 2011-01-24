@@ -80,12 +80,6 @@ module Paypal
         )
         uri.to_s
       end
-
-      def self.build_uri_from_set_auth_flow_param_response(response)
-        if token = Rack::Utils.parse_nested_query(response)["TOKEN"]
-          remote_authentication_url(token)
-        end
-      end
     end
 end
 

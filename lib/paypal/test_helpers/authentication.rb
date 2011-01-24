@@ -1,6 +1,11 @@
 module Paypal
   module TestHelpers
     module Authentication
+      def paypal_authentication_token_query_hash(token = nil)
+        token ||= sample_paypal_authentication_token
+        {"token" => token}
+      end
+
       def sample_paypal_authentication_token
         "HA-QBUBK9F4R7GWL"
       end
