@@ -2,8 +2,28 @@ module Paypal
   module Authentication
     require 'rack'
     include HTTParty
+    class Response
+      attr_accessor :raw_response
+
+      def initialize(raw_response)
+        @raw_response = raw_response
+      end
+
+      def token
+        Rack::Utils.parse_query(raw_response)["TOKEN"]
+      end
+
+      def success?
+        Rack::Utils.parse_query(raw_response)["ACK"] == "Success"
+      end
+    end
+
     private
-      def authenticate_with_paypal_url(return_url)
+      def remote_authentication_url(token)
+        Paypal::Authentication.remote_authentication_url(token)
+      end
+
+      def set_auth_flow_param!(return_url)
         body = {
           "METHOD" => "SetAuthFlowParam",
           "VERSION" => "2.3",
@@ -20,9 +40,9 @@ module Paypal
         }
         request_uri = URI.parse(Paypal.nvp_uri)
         request_uri.scheme = "https" # force https
-        response = Paypal::Authentication.send_request(body)
-        url = Paypal::Authentication.build_uri_from_set_auth_flow_param_response(response)
-        url ? url : return_url
+        Paypal::Authentication::Response.new(
+          Paypal::Authentication.send_request(body)
+        )
       end
 
       def get_auth_details(token)
@@ -53,13 +73,17 @@ module Paypal
         self.post(Paypal.nvp_uri, :body => body).body
       end
 
+      def self.remote_authentication_url(token)
+        uri = URI.parse(Paypal.uri)
+        uri.query = Rack::Utils.build_nested_query(
+          "token" => token, "cmd" => "_account-authenticate-login"
+        )
+        uri.to_s
+      end
+
       def self.build_uri_from_set_auth_flow_param_response(response)
         if token = Rack::Utils.parse_nested_query(response)["TOKEN"]
-          uri = URI.parse(Paypal.uri)
-          uri.query = Rack::Utils.build_nested_query(
-            "token" => token, "cmd" => "_account-authenticate-login"
-          )
-          uri.to_s
+          remote_authentication_url(token)
         end
       end
     end
