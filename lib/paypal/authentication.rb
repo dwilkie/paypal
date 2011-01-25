@@ -3,18 +3,73 @@ module Paypal
     require 'rack'
     include HTTParty
     class Response
-      attr_accessor :raw_response
+      attr_reader :raw_response
+      attr_reader :raw_response_hash
 
       def initialize(raw_response)
         @raw_response = raw_response
-      end
-
-      def token
-        Rack::Utils.parse_query(raw_response)["TOKEN"]
+        @raw_response_hash = Rack::Utils.parse_query(raw_response)
       end
 
       def success?
-        Rack::Utils.parse_query(raw_response)["ACK"] == "Success"
+        ack == "Success"
+      end
+
+      def failure?
+        ack == "Failure"
+      end
+
+      def ack
+        raw_response_hash["ACK"]
+      end
+
+      def long_error_message
+        raw_response_hash["L_LONGMESSAGE0"]
+      end
+
+      def short_error_message
+        raw_response_hash["L_SHORTMESSAGE0"]
+      end
+
+      def error_code
+        raw_response_hash["L_ERRORCODE0"]
+      end
+
+      def timestamp
+        raw_response_hash["TIMESTAMP"]
+      end
+
+      def correlation_id
+        raw_response_hash["CORRELATIONID"]
+      end
+
+      def severity_code
+        raw_response_hash["L_SEVERITYCODE0"]
+      end
+
+      def build
+        raw_response_hash["BUILD"]
+      end
+
+      def version
+        raw_response_hash["VERSION"]
+      end
+    end
+
+    class SetAuthFlowParamResponse < Response
+      def token
+        raw_response_hash["TOKEN"]
+      end
+    end
+
+    class GetAuthDetailsResponse < Response
+      def user_details
+        {
+          :payer_id => raw_response_hash["PAYERID"],
+          :first_name => raw_response_hash["FIRSTNAME"],
+          :last_name => raw_response_hash["LASTNAME"],
+          :email => raw_response_hash["EMAIL"]
+        }
       end
     end
 
@@ -40,12 +95,12 @@ module Paypal
         }
         request_uri = URI.parse(Paypal.nvp_uri)
         request_uri.scheme = "https" # force https
-        Paypal::Authentication::Response.new(
+        Paypal::Authentication::SetAuthFlowParamResponse.new(
           Paypal::Authentication.send_request(body)
         )
       end
 
-      def get_auth_details(token)
+      def get_auth_details!(token)
         body = {
           "METHOD" => "GetAuthDetails",
           "VERSION" => "2.3",
@@ -54,19 +109,13 @@ module Paypal
           "SIGNATURE" => Paypal.api_signature,
           "TOKEN" => token
         }
-        Paypal::Authentication.normalize_paypal_response(
+        Paypal::Authentication::GetAuthDetailsResponse.new(
           Paypal::Authentication.send_request(body)
         )
       end
 
-      def self.normalize_paypal_response(raw_response)
-        raw_response_hash = Rack::Utils.parse_nested_query(raw_response)
-        {
-          :payer_id => raw_response_hash["PAYERID"],
-          :first_name => raw_response_hash["FIRSTNAME"],
-          :last_name => raw_response_hash["LASTNAME"],
-          :email => raw_response_hash["EMAIL"]
-        } if raw_response_hash["ACK"] == "Success"
+      def get_token_from_query_params(query_params)
+        query_params["token"]
       end
 
       def self.send_request(body)
