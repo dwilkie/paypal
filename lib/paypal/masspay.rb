@@ -2,7 +2,7 @@ module Paypal
   module Masspay
     include HTTParty
 
-    def self.masspay(payer_email, receiver_email, amount, currency, note, unique_id)
+    def self.masspay(payer_email, receiver_email, amount, currency, note, unique_id, email_subject = '')
       request_uri = URI.parse(Paypal.nvp_uri)
       request_uri.scheme = "https" # force https
 
@@ -15,12 +15,32 @@ module Paypal
         "PWD" => Paypal.api_password,
         "SIGNATURE" => Paypal.api_signature,
         "RECEIVERTYPE" => "EmailAddress",
-        "L_EMAIL0" => receiver_email,
-        "L_AMT0" => amount,
-        "L_UNIQUEID0" => unique_id,
-        "L_NOTE0" => note
+        "EMAIL_SUBJECT" => email_subject
       }
-      self.post(request_uri.to_s, :body => body).body
+      response = ''
+      if receiver_email.is_a?(Array)
+        max = 250
+        new_body = body.dup
+        (receiver_email.length.to_f / max).ceil.times do |group|
+          offset = group * max
+          receiver_email[offset..(offset + max -1)].each_with_index do |email, i|
+            new_body = new_body.merge({
+              "L_EMAIL#{i}" => email,
+              "L_AMT#{i}" => amount.is_a?(Array) ? amount[i] : amount,
+              "L_UNIQUEID#{i}" => "#{unique_id}-#{i}",
+              "L_NOTE#{i}" => note})
+          end
+          response = self.post(request_uri.to_s, :body => new_body).body
+        end
+      else
+        body = body.merge({
+          "L_EMAIL0" => receiver_email,
+          "L_AMT0" => amount,
+          "L_UNIQUEID0" => unique_id,
+          "L_NOTE0" => note})
+        response = self.post(request_uri.to_s, :body => body).body
+      end
+      response
     end
 
     def successful_payment?
@@ -28,14 +48,15 @@ module Paypal
     end
 
     private
-      def masspay(payer_email, receiver_email, amount, currency, note, unique_id)
+      def masspay(payer_email, receiver_email, amount, currency, note, unique_id, email_subject = '')
         Paypal::Masspay.masspay(
           payer_email,
           receiver_email,
           amount,
           currency,
           note,
-          unique_id
+          unique_id,
+          email_subject
         )
       end
 
