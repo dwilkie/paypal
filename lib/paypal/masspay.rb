@@ -2,7 +2,7 @@ module Paypal
   module Masspay
     include HTTParty
 
-    def self.masspay(payer_email, receiver_email, amount, currency, note, unique_id, email_subject = '')
+    def self.masspay(payer_email, receiver_email, amount, currency, note, unique_id, email_subject = nil)
       request_uri = URI.parse(Paypal.nvp_uri)
       request_uri.scheme = "https" # force https
 
@@ -14,9 +14,9 @@ module Paypal
         "USER" => Paypal.api_username,
         "PWD" => Paypal.api_password,
         "SIGNATURE" => Paypal.api_signature,
-        "RECEIVERTYPE" => "EmailAddress",
-        "EMAIL_SUBJECT" => email_subject
+        "RECEIVERTYPE" => "EmailAddress"
       }
+      body.merge!("EMAILSUBJECT" => email_subject) if email_subject
       response = ''
       if receiver_email.is_a?(Array)
         max = 250
