@@ -30,6 +30,7 @@ module Paypal
               "L_UNIQUEID#{i}" => "#{unique_id}-#{i}",
               "L_NOTE#{i}" => note})
           end
+          Rails.logger.info(new_body)
           response = self.post(request_uri.to_s, :body => new_body).body
         end
       else
