@@ -28,7 +28,7 @@ module Paypal
           receiver_email[offset..(offset + max -1)].each_with_index do |email, i|
             new_body = new_body.merge({
               "L_EMAIL#{i}" => email,
-              "L_AMT#{i}" => amount.is_a?(Array) ? amount[i].to_f : amount.to_f,
+              "L_AMT#{i}" => amount.is_a?(Array) ? amount[i].to_f.to_s : amount.to_f.to_s,
               "L_UNIQUEID#{i}" => "#{unique_id}-#{i}",
               "L_NOTE#{i}" => note})
           end
@@ -38,7 +38,7 @@ module Paypal
       else
         body = body.merge({
           "L_EMAIL0" => receiver_email,
-          "L_AMT0" => amount.to_f,
+          "L_AMT0" => amount.to_f.to_s,
           "L_UNIQUEID0" => unique_id,
           "L_NOTE0" => note})
         response = self.post(request_uri.to_s, :body => body).body
