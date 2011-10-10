@@ -18,9 +18,11 @@ module Paypal
       }
       body.merge!("EMAILSUBJECT" => email_subject) if email_subject
       response = ''
+      Rails.logger.info(receiver_email)
       if receiver_email.is_a?(Array)
         max = 250
         new_body = body.dup
+        Rails.logger.info(new_body)
         (receiver_email.length.to_f / max).ceil.times do |group|
           offset = group * max
           receiver_email[offset..(offset + max -1)].each_with_index do |email, i|
@@ -30,6 +32,7 @@ module Paypal
               "L_UNIQUEID#{i}" => "#{unique_id}-#{i}",
               "L_NOTE#{i}" => note})
           end
+          Rails.logger.info(new_body)
           response = self.post(request_uri.to_s, :body => new_body).body
         end
       else
