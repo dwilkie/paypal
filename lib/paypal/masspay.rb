@@ -18,27 +18,24 @@ module Paypal
       }
       body.merge!("EMAILSUBJECT" => email_subject) if email_subject
       response = ''
-      Rails.logger.info(receiver_email)
       if receiver_email.is_a?(Array)
         max = 250
         new_body = body.dup
-        Rails.logger.info(new_body)
         (receiver_email.length.to_f / max).ceil.times do |group|
           offset = group * max
           receiver_email[offset..(offset + max -1)].each_with_index do |email, i|
             new_body = new_body.merge({
               "L_EMAIL#{i}" => email,
-              "L_AMT#{i}" => amount.is_a?(Array) ? amount[i] : amount,
+              "L_AMT#{i}" => amount.is_a?(Array) ? amount[i].to_f : amount.to_f,
               "L_UNIQUEID#{i}" => "#{unique_id}-#{i}",
               "L_NOTE#{i}" => note})
           end
-          Rails.logger.info(new_body)
           response = self.post(request_uri.to_s, :body => new_body).body
         end
       else
         body = body.merge({
           "L_EMAIL0" => receiver_email,
-          "L_AMT0" => amount,
+          "L_AMT0" => amount.to_f,
           "L_UNIQUEID0" => unique_id,
           "L_NOTE0" => note})
         response = self.post(request_uri.to_s, :body => body).body
