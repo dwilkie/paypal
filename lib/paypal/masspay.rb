@@ -1,6 +1,41 @@
 module Paypal
   module Masspay
     include HTTParty
+    
+    MASSPAY_LIMIT = 250
+    
+    def self.pay(payments, payer_email, currency, email_subject = nil)
+      request_uri = URI.parse(Paypal.nvp_uri)
+      request_uri.scheme = "https" # force https
+
+      body = {
+        "METHOD" => "MassPay",
+        "VERSION" => "2.3",
+        "CURRENCYCODE" => currency,
+        "SUBJECT" => payer_email,
+        "USER" => Paypal.api_username,
+        "PWD" => Paypal.api_password,
+        "SIGNATURE" => Paypal.api_signature,
+        "RECEIVERTYPE" => "EmailAddress"
+      }
+      body.merge!("EMAILSUBJECT" => email_subject) if email_subject
+      response = ''
+      
+      new_body = body.dup
+      Rails.logger.info(new_body)
+      payments.each_with_index do |payment, i|
+        new_body = new_body.merge({
+          "L_EMAIL#{i}" => payment[:email],
+          "L_AMT#{i}" => payment[:amount],
+          "L_UNIQUEID#{i}" => payment[:unique_id],
+          "L_NOTE#{i}" => payment[:note]
+        })
+        Rails.logger.info(new_body)
+        response = self.post(request_uri.to_s, :body => new_body).body
+      end
+      
+      response
+    end
 
     def self.masspay(payer_email, receiver_email, amount, currency, note, unique_id, email_subject = nil)
       request_uri = URI.parse(Paypal.nvp_uri)
@@ -20,17 +55,16 @@ module Paypal
       response = ''
       Rails.logger.info(receiver_email)
       if receiver_email.is_a?(Array)
-        max = 250
         new_body = body.dup
         Rails.logger.info(new_body)
         (receiver_email.length.to_f / max).ceil.times do |group|
-          offset = group * max
-          receiver_email[offset..(offset + max -1)].each_with_index do |email, i|
+          offset = group * MASSPAY_LIMIT
+          receiver_email[offset..(offset + MASSPAY_LIMIT - 1)].each_with_index do |email, i|
             new_body = new_body.merge({
               "L_EMAIL#{i}" => email,
               "L_AMT#{i}" => amount.is_a?(Array) ? amount[i] : amount,
-              "L_UNIQUEID#{i}" => "#{unique_id}-#{i}",
-              "L_NOTE#{i}" => note})
+              "L_UNIQUEID#{i}" => unique_id.is_a?(Array) ? unique_id[i] : unique_id,
+              "L_NOTE#{i}" => note.is_a?(Array) ? note[i] : note})
           end
           Rails.logger.info(new_body)
           response = self.post(request_uri.to_s, :body => new_body).body

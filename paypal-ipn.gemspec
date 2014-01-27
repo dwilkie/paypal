@@ -11,7 +11,6 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/dwilkie/paypal"
   s.summary     = %q{More than just IPNs}
   s.description = %q{A ruby library for handling paypal api's including IPNs}
-  s.add_runtime_dependency("httparty")
 
   s.rubyforge_project = "paypal"
 
@@ -19,5 +18,9 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
+  
+  # Gemfile
+  s.add_runtime_dependency("httparty")
+  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'webmock'
 end
-
