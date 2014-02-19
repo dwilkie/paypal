@@ -31,8 +31,9 @@ module Paypal
           "L_NOTE#{i}" => payment[:note]
         })
         Rails.logger.info(new_body)
-        response = self.post(request_uri.to_s, :body => new_body).body
       end
+      
+      response = self.post(request_uri.to_s, :body => new_body).body
       
       response
     end
