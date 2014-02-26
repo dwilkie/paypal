@@ -84,6 +84,21 @@ module Paypal
     def successful_payment?
       payment_response["ACK"] == "Success"
     end
+    
+    def payment_error_type
+      case payment_response["L_ERRORCODE0"]
+        when "10002" || "10007"
+          :unauthorized
+        when "10321"
+          :insufficient_funds
+        else
+          :unknown
+      end
+    end
+
+    def payment_error_message
+      payment_response["L_LONGMESSAGE0"]
+    end
 
     private
       def masspay(payer_email, receiver_email, amount, currency, note, unique_id, email_subject = '')
@@ -96,21 +111,6 @@ module Paypal
           unique_id,
           email_subject
         )
-      end
-
-      def payment_error_type
-        case payment_response["L_ERRORCODE0"]
-          when "10002" || "10007"
-            :unauthorized
-          when "10321"
-            :insufficient_funds
-          else
-            :unknown
-        end
-      end
-
-      def payment_error_message
-        payment_response["L_LONGMESSAGE0"]
       end
   end
 end
